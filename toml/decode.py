@@ -128,14 +128,14 @@ def decode_datetime(value):
 
 
 def decode_literal_string(value):
-    """ Remove one quote from each side of a string.
+    """ Remove one quote from each end of the string.
     """
     return value[1:-1]
 
 
 def decode_literal_string_multiline(value):
-    """ Remove triple quotes from each end of the string and trim a
-    starting newline if present.
+    """ Remove 3 quotes from each end of the string and trim a starting
+    newline if present.
     """
     value = value[3:-3]
     if value.startswith('\n'):
@@ -154,6 +154,8 @@ BASIC_STRING_ESCAPE_CHARS = (
 
 
 def escape_basic_string(string):
+    """ Replace any escape sequences with the relevant characters.
+    """
     for old, new in BASIC_STRING_ESCAPE_CHARS:
         string = string.replace(old, new)
     return string
