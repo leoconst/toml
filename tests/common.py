@@ -27,6 +27,11 @@ MAPPING = {
         'list': [(4.1, 0.1), (3, 4, 1), (), (True, False)],
     },
     'bar': 3.2,
+    'special': {
+        'infinity': float('inf'),
+        'neg-inf': float('-inf'),
+        'not-a-number': float('nan'),
+    },
 }
 
 STRING = '''
@@ -49,4 +54,9 @@ no = false
 
 [table."b.c"]
 e = 5
+
+[special]
+infinity = inf
+neg-inf = -inf
+not-a-number = nan
 '''.strip()

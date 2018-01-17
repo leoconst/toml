@@ -2,9 +2,10 @@ import re
 
 import pytest
 
-from common import augment_path; augment_path()
+from common import augment_path, MAPPING, STRING
+augment_path()
 
-from toml.decode import KEYWORD, INTEGER, DATETIME
+from toml.decode import KEYWORD, INTEGER, DATETIME, from_string
 
 
 @pytest.mark.parametrize('invalid', [
