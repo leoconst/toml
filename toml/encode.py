@@ -9,7 +9,7 @@ def encode(value):
 
 
 @encode.register(str)
-def _encode_str(value):
+def encode_str(value):
     value = repr(value)[1:-1]
     value = value.replace('"', '\\"')
     return '"' + value + '"'
@@ -17,45 +17,44 @@ def _encode_str(value):
 
 @encode.register(int)
 @encode.register(float)
-def _encode_number(value):
+def encode_number(value):
     return str(value)
 
 
 @encode.register(bool)
-def _encode_bool(value):
+def encode_bool(value):
     return 'true' if value else 'false'
 
 
 @encode.register(datetime)
-def _encode_datetime(value):
+def encode_datetime(value):
     iso_format = value.isoformat()
     return iso_format if value.tzinfo is None else iso_format + 'Z'
 
 
 @encode.register(date)
 @encode.register(time)
-def _encode_date_or_time(value):
+def encode_date_or_time(value):
     return value.isoformat()
 
 
 @encode.register(Sequence)
-def _encode_sequence(value):
+def encode_sequence(value):
     if not value:
         return '[]'
-    return f"[ {', '.join(map(encode, value))} ]"
+    return '[ ' + ', '.join(map(encode, value)) + ' ]'
 
 
-def _encode_mapping(mapping, parent_title=''):
-
+def encode_mapping(mapping, parent_title=''):
     lines = []
     append = lines.append
 
     for key, value in sorted(mapping.items(), key=_sort_item):
-        key = _encoded_key(key)
+        key = encoded_key(key)
         if isinstance(value, Mapping):
             title = parent_title + key
             append('\n[' + title + ']')
-            append(_encode_mapping(value, title + '.'))
+            append(encode_mapping(value, title + '.'))
         else:
             append(key + ' = ' + encode(value))
 
@@ -63,7 +62,7 @@ def _encode_mapping(mapping, parent_title=''):
 
 
 def to_string(mapping):
-    return _encode_mapping(mapping)
+    return encode_mapping(mapping)
 
 
 def to_path(path, mapping):
@@ -73,9 +72,9 @@ def to_path(path, mapping):
         stream.write(to_string(mapping))
 
 
-def _encoded_key(key):
+def encoded_key(key):
     if '.' in key:
-        return _encode_str(key)
+        return encode_str(key)
     return key
 
 
