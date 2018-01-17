@@ -11,6 +11,7 @@ MAPPING = {
     'foo': 2,
     'table': {
         'foo': [1, 2, 3],
+        'empty': (),
         'bar': -.3,
         'a': {
             'foo': 'Hello, I am a string.',
@@ -40,6 +41,7 @@ bar = 3.2
 
 [table]
 foo = [ 1, 2, 3 ]
+empty = []
 bar = -0.3
 time = 0432-01-05T05:32:00
 list = [ [ 4.1, 0.1 ], [ 3, 4, 1 ], [], [ true, false ] ]
