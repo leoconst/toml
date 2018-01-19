@@ -40,7 +40,7 @@ MAPPING = {
     },
 }
 
-STRING = '''
+STRING = '''\
 foo = 2
 bar = 3.2
 
@@ -71,4 +71,4 @@ datetime = 0001-02-03T04:05:06
 infinity = inf
 neg-inf = -inf
 not-a-number = nan
-'''.strip()
+'''
