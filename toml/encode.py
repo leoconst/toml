@@ -1,4 +1,5 @@
 import functools
+import itertools
 from collections.abc import Mapping, Sequence
 from datetime import datetime, date, time
 
@@ -45,18 +46,45 @@ def encode_sequence(value):
     return '[ ' + ', '.join(map(encode, value)) + ' ]'
 
 
+def encoded_key(key):
+    if '.' in key:
+        return encode_str(key)
+    return key
+
+
+def partition(predicate, iterable):
+    """ Use a predicate to partition entries into False entries and True
+    entries.
+    >>> [tuple(it) for it in partition(lambda x: x % 2, range(10))]
+    [(0, 2, 4, 6, 8), (1, 3, 5, 7, 9)]
+    """
+    t1, t2 = itertools.tee(iterable)
+    return itertools.filterfalse(predicate, t1), filter(predicate, t2)
+
+
+def sort_item(item):
+    key, value = item
+    return isinstance(value, Mapping)
+
+
 def encode_mapping(mapping, parent_title=''):
     lines = []
-    append = lines.append
+    add_line = lines.append
 
-    for key, value in sorted(mapping.items(), key=_sort_item):
-        key = encoded_key(key)
-        if isinstance(value, Mapping):
-            title = parent_title + key
-            append('\n[' + title + ']')
-            append(encode_mapping(value, title + '.'))
-        else:
-            append(key + ' = ' + encode(value))
+    # Encode all keys in the given mapping.
+    pairs = ((encoded_key(key), value) for key, value in mapping.items())
+    # Separate the pairs into encoding values and tables.
+    global_pairs, tables = partition(sort_item, pairs)
+
+    for key, value in global_pairs:
+        add_line(f'{key} = {encode(value)}')
+
+    add_line('')
+
+    for key, value in tables:
+        title = parent_title + key
+        add_line('[' + title + ']')
+        add_line(encode_mapping(value, title + '.'))
 
     return '\n'.join(lines)
 
@@ -70,14 +98,3 @@ def to_path(path, mapping):
     """
     with open(path) as stream:
         stream.write(to_string(mapping))
-
-
-def encoded_key(key):
-    if '.' in key:
-        return encode_str(key)
-    return key
-
-
-def _sort_item(item):
-    key, value = item
-    return isinstance(value, Mapping)
