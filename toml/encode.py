@@ -5,41 +5,44 @@ from datetime import datetime, date, time
 
 
 @functools.singledispatch
-def encoded(value):
+def _encoded(value):
     raise TypeError(f'Invalid encoding type: {type(value)}')
 
 
-@encoded.register(str)
+register_encoder = _encoded.register
+
+
+@register_encoder(str)
 def encoded_str(value):
     value = repr(value)[1:-1]
     value = value.replace('"', '\\"')
     return '"' + value + '"'
 
 
-@encoded.register(int)
-@encoded.register(float)
+@register_encoder(int)
+@register_encoder(float)
 def encoded_number(value):
     return str(value)
 
 
-@encoded.register(bool)
+@register_encoder(bool)
 def encoded_bool(value):
     return 'true' if value else 'false'
 
 
-@encoded.register(datetime)
+@register_encoder(datetime)
 def encoded_datetime(value):
     iso_format = value.isoformat()
     return iso_format if value.tzinfo is None else iso_format + 'Z'
 
 
-@encoded.register(date)
-@encoded.register(time)
+@register_encoder(date)
+@register_encoder(time)
 def encoded_date_or_time(value):
     return value.isoformat()
 
 
-@encoded.register(Sequence)
+@register_encoder(Sequence)
 def encoded_sequence(value):
     if not value:
         return '[]'
@@ -67,6 +70,7 @@ def sort_item(item):
     return isinstance(value, Mapping)
 
 
+@register_encoder(Mapping)
 def encoded_mapping(mapping, _parent_title=''):
     lines = []
     add_line = lines.append
@@ -91,8 +95,12 @@ def encoded_mapping(mapping, _parent_title=''):
     return '\n'.join(lines)
 
 
-def to_string(mapping):
-    return encoded_mapping(mapping)
+def encoded(value):
+    """ Return a TOML-encoded string.
+    """
+    # Wrapper around internal encoding function
+    # to restrict call to single parameter.
+    return _encoded(value)
 
 
 def to_path(path, mapping):
