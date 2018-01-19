@@ -5,50 +5,50 @@ from datetime import datetime, date, time
 
 
 @functools.singledispatch
-def encode(value):
+def encoded(value):
     raise TypeError(f'Invalid encoding type: {type(value)}')
 
 
-@encode.register(str)
-def encode_str(value):
+@encoded.register(str)
+def encoded_str(value):
     value = repr(value)[1:-1]
     value = value.replace('"', '\\"')
     return '"' + value + '"'
 
 
-@encode.register(int)
-@encode.register(float)
-def encode_number(value):
+@encoded.register(int)
+@encoded.register(float)
+def encoded_number(value):
     return str(value)
 
 
-@encode.register(bool)
-def encode_bool(value):
+@encoded.register(bool)
+def encoded_bool(value):
     return 'true' if value else 'false'
 
 
-@encode.register(datetime)
-def encode_datetime(value):
+@encoded.register(datetime)
+def encoded_datetime(value):
     iso_format = value.isoformat()
     return iso_format if value.tzinfo is None else iso_format + 'Z'
 
 
-@encode.register(date)
-@encode.register(time)
-def encode_date_or_time(value):
+@encoded.register(date)
+@encoded.register(time)
+def encoded_date_or_time(value):
     return value.isoformat()
 
 
-@encode.register(Sequence)
-def encode_sequence(value):
+@encoded.register(Sequence)
+def encoded_sequence(value):
     if not value:
         return '[]'
-    return '[ ' + ', '.join(map(encode, value)) + ' ]'
+    return '[ ' + ', '.join(map(encoded, value)) + ' ]'
 
 
 def encoded_key(key):
     if '.' in key:
-        return encode_str(key)
+        return encoded_str(key)
     return key
 
 
@@ -67,7 +67,7 @@ def sort_item(item):
     return isinstance(value, Mapping)
 
 
-def encode_mapping(mapping, parent_title=''):
+def encoded_mapping(mapping, parent_title=''):
     lines = []
     add_line = lines.append
 
@@ -77,20 +77,20 @@ def encode_mapping(mapping, parent_title=''):
     global_pairs, tables = partition(sort_item, pairs)
 
     for key, value in global_pairs:
-        add_line(f'{key} = {encode(value)}')
+        add_line(f'{key} = {encoded(value)}')
 
     add_line('')
 
     for key, value in tables:
         title = parent_title + key
         add_line('[' + title + ']')
-        add_line(encode_mapping(value, title + '.'))
+        add_line(encoded_mapping(value, title + '.'))
 
     return '\n'.join(lines)
 
 
 def to_string(mapping):
-    return encode_mapping(mapping)
+    return encoded_mapping(mapping)
 
 
 def to_path(path, mapping):
