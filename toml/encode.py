@@ -67,22 +67,24 @@ def sort_item(item):
     return isinstance(value, Mapping)
 
 
-def encoded_mapping(mapping, parent_title=''):
+def encoded_mapping(mapping, _parent_title=''):
     lines = []
     add_line = lines.append
 
     # Encode all keys in the given mapping.
-    pairs = ((encoded_key(key), value) for key, value in mapping.items())
-    # Separate the pairs into encoding values and tables.
-    global_pairs, tables = partition(sort_item, pairs)
+    encoded_keys = ((encoded_key(key), val) for key, val in mapping.items())
+    # Separate the pairs into key-value pairs and tables.
+    key_value_pairs, tables = partition(sort_item, encoded_keys)
 
-    for key, value in global_pairs:
+    for key, value in key_value_pairs:
         add_line(f'{key} = {encoded(value)}')
 
+    # Separate key-value pairs from tables with a blank line.
     add_line('')
 
     for key, value in tables:
-        title = parent_title + key
+        title = _parent_title + key
+        # Add table header.
         add_line('[' + title + ']')
         add_line(encoded_mapping(value, title + '.'))
 
